@@ -14,3 +14,15 @@
 - **시도했다가 버린 접근**: 없음. 지시서가 요구한 부트스트랩 범위만 그대로 적용했다.
 - **남은 이슈**: M0 웹 배포 경로 검증은 아직 시작하지 않았다.
 - **변경 파일**: AGENTS.md, DEVLOG.md, CREDITS.md, submission/게임소개_200자.md, submission/codex_과정.md, submission/thumbnail_16x9/
+
+---
+
+## [2026-08-05 00:18] M0 단일 스레드 웹 배포 경로 검증
+- **마일스톤**: M0
+- **요청받은 것**: 빈 Godot 4 프로젝트에서 화면 클릭 시 짧은 효과음을 즉시 재생하고, 스레드 없이 웹으로 익스포트해 공개 URL을 확보할 것.
+- **Codex가 구현한 것**: Godot 4.7.1 프로젝트와 960×540 M0 확인 화면을 만들고, 외부 에셋 없이 런타임에 16비트 모노 PCM 클릭음을 생성해 좌클릭 이벤트에서 즉시 재생하도록 구현했다. Web 프리셋의 thread_support와 extensions_support를 끄고, Godot CI 고정 버전으로 headless 실행 및 release export를 통과시켰다. 소스는 main 브랜치, 웹 빌드는 gh-pages 브랜치로 분리해 https://dlsxj101.github.io/overload/ 에 배포했으며 공개 HTML·JS·PCK·WASM의 HTTP 200 응답과 WASM MIME, GODOT_THREADS_ENABLED=false를 확인했다.
+- **사람이 직접 한 것**: Godot 4, 무스레드 웹 빌드, 다른 PC 브라우저 확인, 클릭-소리 지연 판정이라는 M0 기준을 정의했다. 실제 다른 PC에서의 청감 판정은 아직 하지 않았다.
+- **해결한 문제**: 반복 익스포트에서 기존 web/ 결과물이 all_resources 필터에 다시 포함될 수 있음 → export 제외 필터에 web/*를 추가하고 깨끗한 디렉터리에서 다시 빌드해 PCK를 5,128바이트로 유지했다. 공개 주소가 처음 404를 반환함 → GitHub Pages 배포 작업의 queued/building 상태를 추적해 완료 후 HTML·필수 자산을 다시 검사했다. Headless 컨테이너에서 시스템 fontconfig 경고 발생 → 프로젝트는 시스템 폰트를 요구하지 않고 Godot 파서·런타임·익스포트가 성공함을 분리해 확인했다.
+- **시도했다가 버린 접근**: 인앱 브라우저로 로컬 빌드를 직접 클릭해 화면과 입력을 자동 검증하려 했으나, 브라우저 연결기가 WSL 작업경로를 로컬 URI로 해석하지 못해 중단했다. 대신 Godot headless 실행, 로컬 HTTP 응답, 공개 Pages 자산 및 스레드 플래그 검증으로 대체했으며 청감 검증은 자동 통과 처리하지 않았다.
+- **남은 이슈**: 다른 PC의 브라우저에서 공개 URL이 검은 화면 없이 실제 실행되는지, 첫 클릭부터 소리가 나는지, 클릭과 소리 사이 지연이 체감되는지를 사람이 직접 판정해야 한다. 이 판정 전까지 M0 통과는 보류한다.
+- **변경 파일**: .gitignore, project.godot, export_presets.cfg, main.tscn, main.gd, main.gd.uid, DEVLOG.md, web 배포 산출물(gh-pages 브랜치)
