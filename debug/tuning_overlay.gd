@@ -38,6 +38,7 @@ var _preset_picker: OptionButton
 var _sliders: Dictionary = {}
 var _value_labels: Dictionary = {}
 var _preset_paths: Array[String] = []
+var _preset_names: Array[String] = []
 var _snapshot_a: JuiceTuning
 var _snapshot_b: JuiceTuning
 var _showing_a := true
@@ -131,6 +132,7 @@ func _build_interface() -> void:
 	preset_row.add_child(_preset_picker)
 	var load_built_in := _make_button("프리셋 적용", _apply_selected_preset)
 	preset_row.add_child(load_built_in)
+	preset_row.add_child(_make_button("정답 공개", _reveal_selected_preset))
 	content.add_child(preset_row)
 
 	var file_row := HBoxContainer.new()
@@ -211,9 +213,12 @@ func _sync_controls() -> void:
 
 
 func _load_preset_list() -> void:
-	for preset_name in BUILTIN_PRESET_NAMES:
+	var shuffled_names: Array = BUILTIN_PRESET_NAMES.duplicate()
+	shuffled_names.shuffle()
+	for preset_name: String in shuffled_names:
 		_preset_paths.append("%s/%s.tres" % [PRESET_DIRECTORY, preset_name])
-		_preset_picker.add_item(preset_name)
+		_preset_names.append(preset_name)
+		_preset_picker.add_item("후보 %02d" % (_preset_picker.item_count + 1))
 		if preset_name == "balanced_default":
 			_preset_picker.select(_preset_picker.item_count - 1)
 
@@ -229,6 +234,13 @@ func _apply_selected_preset() -> void:
 	_tuning.copy_from(preset)
 	_sync_controls()
 	_set_status("적용: %s" % _preset_picker.get_item_text(selected))
+
+
+func _reveal_selected_preset() -> void:
+	var selected := _preset_picker.selected
+	if selected < 0 or selected >= _preset_names.size():
+		return
+	_set_status("%s 정답: %s" % [_preset_picker.get_item_text(selected), _preset_names[selected]])
 
 
 func _copy_values() -> void:
