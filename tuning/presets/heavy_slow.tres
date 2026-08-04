@@ -1,0 +1,16 @@
+; 의도: 긴 준비와 강한 정지·넉백으로 묵직한 대검 감각을 강조.
+[gd_resource type="Resource" script_class="JuiceTuning" load_steps=2 format=3]
+[ext_resource type="Script" path="res://tuning/juice_tuning.gd" id="1"]
+[resource]
+script = ExtResource("1")
+hitstop_duration = 0.08
+windup_time = 0.24
+swing_time = 0.055
+flash_frames = 4
+knockback_distance = 39.0
+knockback_decay = 0.2
+shake_distance = 9.0
+shake_return_time = 0.16
+sword_arc_degrees = 125.0
+sword_reach = 52.0
+attack_cooldown = 0.22

@@ -1,0 +1,16 @@
+; 의도: 화면 흔들림을 거의 제거해 히트스톱·플래시만의 기여도를 분리 측정.
+[gd_resource type="Resource" script_class="JuiceTuning" load_steps=2 format=3]
+[ext_resource type="Script" path="res://tuning/juice_tuning.gd" id="1"]
+[resource]
+script = ExtResource("1")
+hitstop_duration = 0.06
+windup_time = 0.15
+swing_time = 0.04
+flash_frames = 4
+knockback_distance = 24.0
+knockback_decay = 0.12
+shake_distance = 0.5
+shake_return_time = 0.08
+sword_arc_degrees = 110.0
+sword_reach = 44.0
+attack_cooldown = 0.12

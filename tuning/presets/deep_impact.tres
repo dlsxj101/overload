@@ -1,0 +1,16 @@
+; 의도: 넉백은 절제하고 히트스톱과 화면 밀림에 무게를 몰아 깊은 충격을 탐색.
+[gd_resource type="Resource" script_class="JuiceTuning" load_steps=2 format=3]
+[ext_resource type="Script" path="res://tuning/juice_tuning.gd" id="1"]
+[resource]
+script = ExtResource("1")
+hitstop_duration = 0.095
+windup_time = 0.18
+swing_time = 0.045
+flash_frames = 4
+knockback_distance = 17.0
+knockback_decay = 0.15
+shake_distance = 11.0
+shake_return_time = 0.19
+sword_arc_degrees = 112.0
+sword_reach = 46.0
+attack_cooldown = 0.17

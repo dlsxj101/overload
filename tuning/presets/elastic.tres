@@ -1,0 +1,16 @@
+; 의도: 긴 넉백 감속과 부드러운 화면 복귀로 탄성 있는 밀어내기를 탐색.
+[gd_resource type="Resource" script_class="JuiceTuning" load_steps=2 format=3]
+[ext_resource type="Script" path="res://tuning/juice_tuning.gd" id="1"]
+[resource]
+script = ExtResource("1")
+hitstop_duration = 0.045
+windup_time = 0.14
+swing_time = 0.045
+flash_frames = 3
+knockback_distance = 46.0
+knockback_decay = 0.34
+shake_distance = 6.0
+shake_return_time = 0.28
+sword_arc_degrees = 120.0
+sword_reach = 46.0
+attack_cooldown = 0.15

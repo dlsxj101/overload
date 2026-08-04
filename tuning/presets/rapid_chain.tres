@@ -1,0 +1,16 @@
+; 의도: 쿨다운을 짧게 하되 최소한의 무게를 남겨 반복 타격 중독성을 탐색.
+[gd_resource type="Resource" script_class="JuiceTuning" load_steps=2 format=3]
+[ext_resource type="Script" path="res://tuning/juice_tuning.gd" id="1"]
+[resource]
+script = ExtResource("1")
+hitstop_duration = 0.04
+windup_time = 0.075
+swing_time = 0.025
+flash_frames = 3
+knockback_distance = 16.0
+knockback_decay = 0.065
+shake_distance = 4.0
+shake_return_time = 0.055
+sword_arc_degrees = 100.0
+sword_reach = 42.0
+attack_cooldown = 0.045

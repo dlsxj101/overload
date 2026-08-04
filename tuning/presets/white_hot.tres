@@ -1,0 +1,16 @@
+; 의도: 8프레임 순백 플래시로 피격 가독성과 과노출 경계선을 확인.
+[gd_resource type="Resource" script_class="JuiceTuning" load_steps=2 format=3]
+[ext_resource type="Script" path="res://tuning/juice_tuning.gd" id="1"]
+[resource]
+script = ExtResource("1")
+hitstop_duration = 0.055
+windup_time = 0.15
+swing_time = 0.04
+flash_frames = 8
+knockback_distance = 22.0
+knockback_decay = 0.12
+shake_distance = 5.0
+shake_return_time = 0.1
+sword_arc_degrees = 110.0
+sword_reach = 44.0
+attack_cooldown = 0.12

@@ -1,0 +1,16 @@
+; 의도: 최소 준비 후 극단적으로 빠른 스윙과 빠른 화면 복귀로 즉응성을 시험.
+[gd_resource type="Resource" script_class="JuiceTuning" load_steps=2 format=3]
+[ext_resource type="Script" path="res://tuning/juice_tuning.gd" id="1"]
+[resource]
+script = ExtResource("1")
+hitstop_duration = 0.04
+windup_time = 0.085
+swing_time = 0.02
+flash_frames = 3
+knockback_distance = 18.0
+knockback_decay = 0.075
+shake_distance = 4.5
+shake_return_time = 0.05
+sword_arc_degrees = 95.0
+sword_reach = 43.0
+attack_cooldown = 0.08

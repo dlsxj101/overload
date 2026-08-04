@@ -1,48 +1,50 @@
-[gd_scene load_steps=2 format=3]
+[gd_scene load_steps=10 format=3]
 
 [ext_resource type="Script" path="res://main.gd" id="1_main"]
+[ext_resource type="Script" path="res://systems/enemy_pool.gd" id="2_enemy"]
+[ext_resource type="Script" path="res://player/player.gd" id="3_player"]
+[ext_resource type="Script" path="res://systems/combat.gd" id="4_combat"]
+[ext_resource type="Script" path="res://systems/hitstop.gd" id="5_hitstop"]
+[ext_resource type="Script" path="res://systems/camera_shake.gd" id="6_camera"]
+[ext_resource type="Script" path="res://systems/audio_hit.gd" id="7_audio"]
+[ext_resource type="Script" path="res://debug/tuning_overlay.gd" id="8_overlay"]
+[ext_resource type="FontFile" path="res://fonts/BlackHanSans-Regular.ttf" id="9_font"]
 
 [node name="Main" type="Node2D"]
 script = ExtResource("1_main")
 
-[node name="Background" type="ColorRect" parent="."]
-offset_right = 960.0
-offset_bottom = 540.0
+[node name="EnemyPool" type="Node2D" parent="."]
+script = ExtResource("2_enemy")
+
+[node name="Player" type="Node2D" parent="."]
+script = ExtResource("3_player")
+
+[node name="Combat" type="Node2D" parent="."]
+script = ExtResource("4_combat")
+
+[node name="Hitstop" type="Node" parent="."]
+process_mode = 3
+script = ExtResource("5_hitstop")
+
+[node name="CameraShake" type="Node" parent="."]
+script = ExtResource("6_camera")
+
+[node name="AudioHit" type="Node" parent="."]
+process_mode = 3
+script = ExtResource("7_audio")
+
+[node name="Instructions" type="Label" parent="."]
+offset_left = 257.0
+offset_top = 500.0
+offset_right = 703.0
+offset_bottom = 529.0
 mouse_filter = 2
-color = Color(0.0705882, 0.0941176, 0.113725, 1)
-
-[node name="Center" type="CenterContainer" parent="."]
-offset_right = 960.0
-offset_bottom = 540.0
-mouse_filter = 2
-
-[node name="Content" type="VBoxContainer" parent="Center"]
-layout_mode = 2
-theme_override_constants/separation = 18
-alignment = 1
-
-[node name="Title" type="Label" parent="Center/Content"]
-layout_mode = 2
-theme_override_colors/font_color = Color(0.901961, 0.92549, 0.937255, 1)
-theme_override_font_sizes/font_size = 44
-text = "과부하 / OVERLOAD"
+theme_override_colors/font_color = Color(0.72, 0.78, 0.81, 0.82)
+theme_override_fonts/font = ExtResource("9_font")
+theme_override_font_sizes/font_size = 17
+text = "WASD 이동  ·  마우스 조준  ·  좌클릭 베기  ·  F1 튜닝"
 horizontal_alignment = 1
 
-[node name="Status" type="Label" parent="Center/Content"]
-layout_mode = 2
-theme_override_colors/font_color = Color(0, 0.898039, 0.815686, 1)
-theme_override_font_sizes/font_size = 20
-text = "M0  ·  화면을 클릭해 오디오 응답 확인"
-horizontal_alignment = 1
-
-[node name="Feedback" type="ColorRect" parent="Center/Content"]
-custom_minimum_size = Vector2(400, 4)
-layout_mode = 2
-mouse_filter = 2
-color = Color(0, 0.898039, 0.815686, 0.24)
-
-[node name="AudioPlayer" type="AudioStreamPlayer" parent="."]
-
-[node name="FeedbackTimer" type="Timer" parent="."]
-wait_time = 0.08
-one_shot = true
+[node name="TuningOverlay" type="CanvasLayer" parent="."]
+process_mode = 3
+script = ExtResource("8_overlay")

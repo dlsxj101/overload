@@ -1,0 +1,16 @@
+; 의도: 넓은 170도 부채꼴로 공간을 쓸어내는 느낌과 시인성을 확인.
+[gd_resource type="Resource" script_class="JuiceTuning" load_steps=2 format=3]
+[ext_resource type="Script" path="res://tuning/juice_tuning.gd" id="1"]
+[resource]
+script = ExtResource("1")
+hitstop_duration = 0.06
+windup_time = 0.19
+swing_time = 0.055
+flash_frames = 3
+knockback_distance = 30.0
+knockback_decay = 0.15
+shake_distance = 6.5
+shake_return_time = 0.13
+sword_arc_degrees = 170.0
+sword_reach = 49.0
+attack_cooldown = 0.18
