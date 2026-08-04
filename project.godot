@@ -1,0 +1,24 @@
+; Engine configuration file.
+; Edit it through the Godot editor when possible.
+
+config_version=5
+
+[application]
+
+config/name="과부하 / OVERLOAD"
+run/main_scene="res://main.tscn"
+config/features=PackedStringArray("4.7", "GL Compatibility")
+
+[display]
+
+window/size/viewport_width=960
+window/size/viewport_height=540
+window/size/window_width_override=960
+window/size/window_height_override=540
+window/stretch/mode="canvas_items"
+
+[rendering]
+
+renderer/rendering_method="gl_compatibility"
+renderer/rendering_method.mobile="gl_compatibility"
+environment/defaults/default_clear_color=Color(0.071, 0.094, 0.114, 1)
