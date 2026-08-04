@@ -50,3 +50,15 @@
 - **시도했다가 버린 접근**: 활성 더미 자체를 넉백시키는 첫 구조는 연속 타격 표적이 계속 이동해 M1 검증 목적과 충돌해 폐기했다. PCK 내부 프리셋을 DirAccess로 자동 열거하는 방식은 export remap에 취약해 폐기했다. 내장 기본 폰트는 한글 글리프가 없어 폐기했다. 인앱 브라우저 자동 상호작용은 WSL 경로 URI 연결 문제로 사용할 수 없어 Godot 네이티브 프레임 렌더, headless 테스트, 웹 산출물 검사로 대체했다.
 - **남은 이슈**: 사람이 공개 웹 빌드에서 기본값 및 20개 프리셋을 직접 비교하고, 더미를 100번 연속 때렸을 때 계속 때리고 싶은지 판정해야 한다. 이 판정 전까지 M1 통과는 보류하며 M2는 시작하지 않는다.
 - **변경 파일**: project.godot, export_presets.cfg, main.tscn, main.gd, tuning/juice_tuning.gd, tuning/juice.tres, tuning/presets/*.tres, systems/combat.gd, systems/enemy_pool.gd, systems/hitstop.gd, systems/camera_shake.gd, systems/audio_hit.gd, player/player.gd, debug/tuning_overlay.gd, audio/hit/*.ogg, fonts/BlackHanSans-Regular.ttf, fonts/OFL-BlackHanSans.txt, CREDITS.md, tests/m1_smoke_test.gd, tests/m1_100_hit_test.gd, tests/m1_overlay_preview.gd, DEVLOG.md
+
+---
+
+## [2026-08-05 07:43] M1 공개 웹 빌드 배포 검증
+- **마일스톤**: M1
+- **요청받은 것**: M1 구현을 사람이 직접 100회 타격하고 프리셋을 비교할 수 있도록 공개 웹 빌드로 제공할 것.
+- **Codex가 구현한 것**: M1 release export를 gh-pages 커밋 2090f29로 배포하고 Pages 작업 성공을 확인했다. 공개 HTML에서 GODOT_THREADS_ENABLED=false, 공개 WASM의 application/wasm MIME과 HTTP 200을 확인했으며, 공개 PCK와 로컬 최종 PCK의 SHA-256이 2f3cd730d169f6909833abd4a138b397b4d275ac7f3eba60410f9b76dac35539로 일치함을 검증했다.
+- **사람이 직접 한 것**: 아직 없음. 공개 빌드의 타격감과 프리셋 최종 선택은 다음 사람 검증에서 수행한다.
+- **해결한 문제**: 배포 CDN 캐시 때문에 이전 M0 파일을 받을 가능성 → 빌드 커밋을 쿼리에 포함해 새 파일을 받아 로컬 산출물 해시와 직접 대조했다.
+- **시도했다가 버린 접근**: 없음.
+- **남은 이슈**: 사람이 공개 URL에서 기본값으로 100회 연속 타격하고, 20개 프리셋을 블라인드 비교해 계속 때리고 싶은 느낌과 최종 수치를 판정해야 한다. M1 통과 전 M2 착수 금지.
+- **변경 파일**: DEVLOG.md, web 배포 산출물(gh-pages 브랜치)
