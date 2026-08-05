@@ -28,6 +28,8 @@ func _run() -> void:
 	_check(combo.combo_count == 0 and combo.current_tier == 0, "콤보 0에서 티어 0 시작")
 	_check(is_equal_approx(combo.get_sword_scale(), 1.0), "티어 0 칼 1.0배")
 	_check(is_equal_approx(combo.get_hitstop_duration(), 0.05), "티어 0 히트스톱 0.05초")
+	_check(is_equal_approx(combo.get_windup_time(), 0.15), "티어 0 준비동작 0.15초")
+	_check(is_equal_approx(combo.get_windup_time() + combo.get_hitstop_duration(), 0.2), "티어 0 공격 주기 기준 유지")
 	_check(combo.get_combo_label().text == "0", "화면 중앙 콤보 숫자 표시")
 	_check(combo.get_combo_label().get_theme_font_size("font_size") == 148, "콤보 숫자 대형 표시")
 	_check(is_equal_approx(combo.get_combo_label().get_theme_color("font_color").a, 0.13), "콤보 숫자 반투명 표시")
@@ -38,6 +40,8 @@ func _run() -> void:
 	_check(combo.current_tier == 1, "콤보 10에서 티어 1")
 	_check(is_equal_approx(combo.get_sword_scale(), 1.3), "티어 1 칼 1.3배")
 	_check(is_equal_approx(combo.get_hitstop_duration(), 0.06), "티어 1 히트스톱 0.06초")
+	_check(is_equal_approx(combo.get_windup_time(), 0.14), "티어 1 준비동작 0.14초")
+	_check(is_equal_approx(combo.get_windup_time() + combo.get_hitstop_duration(), 0.2), "티어 1 공격 주기 기준 유지")
 	_check(combo.is_transition_active(), "티어 상승 화면 전환 시작")
 	_check(main.JUICE.tier_transition_duration <= 0.2, "티어 전환 0.2초 이내")
 	_check(combo.get_combo_label().scale.x > 1.0, "티어 상승 시 콤보 숫자 확대")
@@ -48,6 +52,8 @@ func _run() -> void:
 	_check(combo.current_tier == 2, "콤보 25에서 티어 2")
 	_check(is_equal_approx(combo.get_sword_scale(), 1.7), "티어 2 칼 1.7배")
 	_check(is_equal_approx(combo.get_hitstop_duration(), 0.08), "티어 2 히트스톱 0.08초")
+	_check(is_equal_approx(combo.get_windup_time(), 0.12), "티어 2 준비동작 0.12초")
+	_check(is_equal_approx(combo.get_windup_time() + combo.get_hitstop_duration(), 0.2), "티어 2 공격 주기 기준 유지")
 	player._record_afterimage(0.0, player.get_effective_sword_reach())
 	_check((player.get("_afterimage_angles") as Array).size() == 1, "티어 2 궤적 잔상 기록")
 
@@ -55,6 +61,8 @@ func _run() -> void:
 	_check(combo.current_tier == 3, "콤보 50에서 티어 3")
 	_check(is_equal_approx(combo.get_sword_scale(), 2.2), "티어 3 칼 2.2배")
 	_check(is_equal_approx(combo.get_hitstop_duration(), 0.1), "티어 3 히트스톱 0.10초")
+	_check(is_equal_approx(combo.get_windup_time(), 0.1), "티어 3 준비동작 0.10초")
+	_check(is_equal_approx(combo.get_windup_time() + combo.get_hitstop_duration(), 0.2), "티어 3 공격 주기 기준 유지")
 	var tier_3_hit := combat.perform_sweep(
 		player.global_position,
 		0.0,
@@ -71,6 +79,8 @@ func _run() -> void:
 	_check(combo.current_tier == 4, "콤보 100에서 티어 4")
 	_check(is_equal_approx(combo.get_sword_scale(), 3.0), "티어 4 칼 3.0배")
 	_check(is_equal_approx(combo.get_hitstop_duration(), 0.12), "티어 4 히트스톱 0.12초")
+	_check(is_equal_approx(combo.get_windup_time(), 0.08), "티어 4 준비동작 0.08초")
+	_check(is_equal_approx(combo.get_windup_time() + combo.get_hitstop_duration(), 0.2), "티어 4 공격 주기 기준 유지")
 	_check(is_equal_approx(player.get_effective_sword_reach(), main.JUICE.sword_reach * 3.0), "칼 배율이 실제 사거리에 적용")
 	_check(is_equal_approx(combo.get_saturation(), 1.35), "티어 4 화면 채도 상승")
 	_check(combo.is_hum_playing(), "티어 4 저역 지속음")

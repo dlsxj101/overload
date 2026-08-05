@@ -18,6 +18,7 @@ var _arena_radius := 0.0
 var _aim_angle := 0.0
 var _attack_aim_angle := 0.0
 var _attack_elapsed := 0.0
+var _attack_windup_time := 0.0
 var _cooldown_remaining := 0.0
 var _previous_swing_angle := 0.0
 var _attack_hit_registered := false
@@ -88,6 +89,7 @@ func _begin_attack() -> void:
 	_attack_queued = false
 	_attack_hit_registered = false
 	_attack_elapsed = 0.0
+	_attack_windup_time = _combo.get_windup_time()
 	_attack_aim_angle = _aim_angle
 	_previous_swing_angle = -deg_to_rad(_tuning.sword_arc_degrees) * 0.5
 	_cooldown_remaining = _tuning.attack_cooldown
@@ -96,7 +98,7 @@ func _begin_attack() -> void:
 
 func _update_windup(delta: float) -> void:
 	_attack_elapsed += delta
-	if _attack_elapsed < _tuning.windup_time:
+	if _attack_elapsed < _attack_windup_time:
 		return
 	_attack_elapsed = 0.0
 	_phase = AttackPhase.SWING
@@ -165,7 +167,7 @@ func _draw() -> void:
 func _current_sword_angle() -> float:
 	var half_arc := deg_to_rad(_tuning.sword_arc_degrees) * 0.5
 	if _phase == AttackPhase.WINDUP:
-		var progress := clampf(_attack_elapsed / maxf(_tuning.windup_time, 0.001), 0.0, 1.0)
+		var progress := clampf(_attack_elapsed / maxf(_attack_windup_time, 0.001), 0.0, 1.0)
 		return _attack_aim_angle + lerpf(0.0, -half_arc, ease(progress, 2.0))
 	var swing_progress := clampf(_attack_elapsed / maxf(_tuning.swing_time, 0.001), 0.0, 1.0)
 	return _attack_aim_angle + lerpf(-half_arc, half_arc, swing_progress)

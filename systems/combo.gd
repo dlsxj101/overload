@@ -99,6 +99,20 @@ func get_hitstop_duration() -> float:
 			return _tuning.hitstop_duration
 
 
+func get_windup_time() -> float:
+	match current_tier:
+		1:
+			return _tuning.tier_1_windup
+		2:
+			return _tuning.tier_2_windup
+		3:
+			return _tuning.tier_3_windup
+		4:
+			return _tuning.tier_4_windup
+		_:
+			return _tuning.windup_time
+
+
 func is_transition_active() -> bool:
 	return _transition_active
 

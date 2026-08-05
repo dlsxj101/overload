@@ -28,6 +28,10 @@ const PARAMETER_SPECS := [
 	{"key": "tier_2_hitstop", "label": "티어2 히트스톱", "min": 0.0, "max": 0.15, "step": 0.005, "integer": false},
 	{"key": "tier_3_hitstop", "label": "티어3 히트스톱", "min": 0.0, "max": 0.15, "step": 0.005, "integer": false},
 	{"key": "tier_4_hitstop", "label": "티어4 히트스톱", "min": 0.0, "max": 0.15, "step": 0.005, "integer": false},
+	{"key": "tier_1_windup", "label": "티어1 준비동작", "min": 0.05, "max": 0.35, "step": 0.005, "integer": false},
+	{"key": "tier_2_windup", "label": "티어2 준비동작", "min": 0.05, "max": 0.35, "step": 0.005, "integer": false},
+	{"key": "tier_3_windup", "label": "티어3 준비동작", "min": 0.05, "max": 0.35, "step": 0.005, "integer": false},
+	{"key": "tier_4_windup", "label": "티어4 준비동작", "min": 0.05, "max": 0.35, "step": 0.005, "integer": false},
 	{"key": "tier_transition_duration", "label": "티어 전환 시간", "min": 0.05, "max": 0.2, "step": 0.005, "integer": false},
 	{"key": "combo_font_size", "label": "콤보 숫자 크기", "min": 64.0, "max": 220.0, "step": 1.0, "integer": true},
 	{"key": "combo_opacity", "label": "콤보 투명도", "min": 0.03, "max": 0.4, "step": 0.01, "integer": false},
@@ -89,6 +93,10 @@ const PARAMETER_SPECS := [
 @export_range(0.0, 0.15, 0.005) var tier_2_hitstop := 0.08
 @export_range(0.0, 0.15, 0.005) var tier_3_hitstop := 0.1
 @export_range(0.0, 0.15, 0.005) var tier_4_hitstop := 0.12
+@export_range(0.05, 0.35, 0.005) var tier_1_windup := 0.14
+@export_range(0.05, 0.35, 0.005) var tier_2_windup := 0.12
+@export_range(0.05, 0.35, 0.005) var tier_3_windup := 0.1
+@export_range(0.05, 0.35, 0.005) var tier_4_windup := 0.08
 @export_range(0.05, 0.2, 0.005) var tier_transition_duration := 0.18
 @export_range(64, 220, 1) var combo_font_size := 148
 @export_range(0.03, 0.4, 0.01) var combo_opacity := 0.13
