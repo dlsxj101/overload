@@ -1,3 +1,4 @@
+; M1 사람 선택: balanced_default. 이 파일이 실제 게임의 기준 타격감이다.
 [gd_resource type="Resource" script_class="JuiceTuning" load_steps=2 format=3]
 
 [ext_resource type="Script" path="res://tuning/juice_tuning.gd" id="1_tuning"]

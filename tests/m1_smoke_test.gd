@@ -27,12 +27,12 @@ func _run() -> void:
 
 	_check(enemy_pool.positions.size() == 1, "적이 배열 원소 1개로 존재")
 	_check(_count_nodes_of_type(main, "RigidBody2D") == 0, "RigidBody2D 없음")
-	_check(_count_preset_files() == 20, "의도 프리셋 정확히 20개")
+	_check(_count_preset_files() == 5, "선별한 특성 DNA 정확히 5개")
 	_check(audio_hit.get_child_count() == 12, "3레이어 × 4보이스 오디오 풀")
 	_check((overlay.get("_sliders") as Dictionary).size() == JuiceTuning.PARAMETER_SPECS.size(), "모든 튜닝 파라미터 슬라이더")
-	_check((overlay.get("_preset_paths") as Array).size() == 20, "웹에서도 고정 로드되는 프리셋 목록 20개")
+	_check((overlay.get("_preset_paths") as Array).size() == 5, "웹에서도 고정 로드되는 DNA 목록 5개")
 	var preset_picker := overlay.get("_preset_picker") as OptionButton
-	_check(preset_picker.get_item_text(0).begins_with("후보 "), "프리셋 이름을 숨긴 블라인드 후보 표시")
+	_check(preset_picker.get_item_text(0).begins_with("DNA · "), "선별 DNA의 한국어 특성 표시")
 	_check(is_equal_approx(main.JUICE.hitstop_duration, 0.05), "기본 히트스톱 0.05초")
 	_check(is_equal_approx(main.JUICE.sword_reach, 44.0), "기본 사거리 플레이어 반경 2.2배")
 	for preset_path in overlay.get("_preset_paths") as Array:

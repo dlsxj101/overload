@@ -6,27 +6,12 @@ const USER_PRESET_PATH := "user://m1_user_preset.tres"
 const UI_FONT: Font = preload("res://fonts/BlackHanSans-Regular.ttf")
 const PANEL_WIDTH := 430.0
 const PANEL_HEIGHT := 508.0
-const BUILTIN_PRESET_NAMES := [
-	"arc_flash",
-	"balanced_default",
-	"brutal_stop",
-	"cinematic",
-	"close_quarters",
-	"contest_safe",
-	"crunchy",
-	"deep_impact",
-	"deliberate",
-	"directional_push",
-	"elastic",
-	"heavy_slow",
-	"light_fast",
-	"long_reach",
-	"low_shake",
-	"precision",
-	"rapid_chain",
-	"snappy",
-	"white_hot",
-	"wide_cleave",
+const DNA_PRESETS := [
+	{"name": "light_fast", "label": "경량·속공"},
+	{"name": "heavy_slow", "label": "중량·강타"},
+	{"name": "wide_cleave", "label": "광역·횡베기"},
+	{"name": "precision", "label": "정밀·결투"},
+	{"name": "elastic", "label": "탄성·밀어내기"},
 ]
 
 var _tuning: JuiceTuning
@@ -130,9 +115,9 @@ func _build_interface() -> void:
 	_preset_picker = OptionButton.new()
 	_preset_picker.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	preset_row.add_child(_preset_picker)
-	var load_built_in := _make_button("프리셋 적용", _apply_selected_preset)
+	var load_built_in := _make_button("DNA 적용", _apply_selected_preset)
 	preset_row.add_child(load_built_in)
-	preset_row.add_child(_make_button("정답 공개", _reveal_selected_preset))
+	preset_row.add_child(_make_button("파일명 확인", _reveal_selected_preset))
 	content.add_child(preset_row)
 
 	var file_row := HBoxContainer.new()
@@ -213,14 +198,11 @@ func _sync_controls() -> void:
 
 
 func _load_preset_list() -> void:
-	var shuffled_names: Array = BUILTIN_PRESET_NAMES.duplicate()
-	shuffled_names.shuffle()
-	for preset_name: String in shuffled_names:
+	for preset_spec: Dictionary in DNA_PRESETS:
+		var preset_name: String = preset_spec["name"]
 		_preset_paths.append("%s/%s.tres" % [PRESET_DIRECTORY, preset_name])
 		_preset_names.append(preset_name)
-		_preset_picker.add_item("후보 %02d" % (_preset_picker.item_count + 1))
-		if preset_name == "balanced_default":
-			_preset_picker.select(_preset_picker.item_count - 1)
+		_preset_picker.add_item("DNA · %s" % preset_spec["label"])
 
 
 func _apply_selected_preset() -> void:
