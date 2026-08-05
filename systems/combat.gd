@@ -6,15 +6,21 @@ const SPARK_SPEED := 180.0
 const SPARK_LIFETIME := 0.11
 const SPARK_SPREAD_RADIANS := 0.75
 const SPARK_COLOR := Color("00e5d0")
+const ELECTRIC_SEGMENTS := 4
 
 var _tuning: JuiceTuning
 var _enemy_pool: EnemyPool
 var _hitstop: Hitstop
 var _camera_shake: DirectionalCameraShake
 var _audio_hit: LayeredHitAudio
+var _combo: ComboSystem
 var _spark_positions: Array[Vector2] = []
 var _spark_velocities: Array[Vector2] = []
 var _spark_lifetimes: Array[float] = []
+var _electric_origins: Array[Vector2] = []
+var _electric_directions: Array[Vector2] = []
+var _electric_lifetimes: Array[float] = []
+var _electric_seeds: Array[int] = []
 
 
 func configure(
@@ -22,18 +28,18 @@ func configure(
 	enemy_pool: EnemyPool,
 	hitstop: Hitstop,
 	camera_shake: DirectionalCameraShake,
-	audio_hit: LayeredHitAudio
+	audio_hit: LayeredHitAudio,
+	combo: ComboSystem
 ) -> void:
 	_tuning = tuning_resource
 	_enemy_pool = enemy_pool
 	_hitstop = hitstop
 	_camera_shake = camera_shake
 	_audio_hit = audio_hit
+	_combo = combo
 
 
 func _process(delta: float) -> void:
-	if _spark_positions.is_empty():
-		return
 	for index in range(_spark_positions.size() - 1, -1, -1):
 		_spark_lifetimes[index] -= delta
 		if _spark_lifetimes[index] <= 0.0:
@@ -43,7 +49,15 @@ func _process(delta: float) -> void:
 			continue
 		_spark_positions[index] += _spark_velocities[index] * delta
 		_spark_velocities[index] *= maxf(0.0, 1.0 - delta * 12.0)
-	queue_redraw()
+	for index in range(_electric_origins.size() - 1, -1, -1):
+		_electric_lifetimes[index] -= delta
+		if _electric_lifetimes[index] <= 0.0:
+			_electric_origins.remove_at(index)
+			_electric_directions.remove_at(index)
+			_electric_lifetimes.remove_at(index)
+			_electric_seeds.remove_at(index)
+	if not _spark_positions.is_empty() or not _electric_origins.is_empty():
+		queue_redraw()
 
 
 func _draw() -> void:
@@ -52,6 +66,8 @@ func _draw() -> void:
 		var velocity_direction := _spark_velocities[index].normalized()
 		var tail := _spark_positions[index] - velocity_direction * 9.0 * life_ratio
 		draw_line(tail, _spark_positions[index], Color(SPARK_COLOR, life_ratio), 2.0, true)
+	for index in _electric_origins.size():
+		_draw_electric_bolt(index)
 
 
 func perform_sweep(
@@ -71,10 +87,13 @@ func perform_sweep(
 		hit_direction = Vector2.from_angle(aim_angle)
 
 	_enemy_pool.hit_enemy(enemy_index, hit_direction)
+	var tier := _combo.register_kill()
 	_spawn_sparks(impact_position, hit_direction)
+	if tier >= 3:
+		_spawn_electric_sparks(impact_position, hit_direction)
 	_camera_shake.kick(hit_direction, _tuning.shake_distance, _tuning.shake_return_time)
-	_audio_hit.play_hit()
-	_hitstop.begin(_tuning.hitstop_duration)
+	_audio_hit.play_hit(tier)
+	_hitstop.begin(_combo.get_hitstop_duration())
 	return true
 
 
@@ -87,3 +106,34 @@ func _spawn_sparks(impact_position: Vector2, direction: Vector2) -> void:
 		_spark_velocities.append(direction.rotated(spread_angle) * SPARK_SPEED * speed_weight)
 		_spark_lifetimes.append(SPARK_LIFETIME)
 	queue_redraw()
+
+
+func _spawn_electric_sparks(impact_position: Vector2, direction: Vector2) -> void:
+	var bolt_count := maxi(1, _tuning.electric_bolt_count)
+	for bolt_index in bolt_count:
+		var normalized_index := float(bolt_index) / float(maxi(bolt_count - 1, 1))
+		var spread_angle := lerpf(-1.25, 1.25, normalized_index)
+		_electric_origins.append(impact_position)
+		_electric_directions.append(direction.rotated(spread_angle))
+		_electric_lifetimes.append(_tuning.electric_bolt_lifetime)
+		_electric_seeds.append((bolt_index + 1) * 37 + _combo.combo_count * 11)
+	queue_redraw()
+
+
+func _draw_electric_bolt(index: int) -> void:
+	var life_ratio := _electric_lifetimes[index] / maxf(_tuning.electric_bolt_lifetime, 0.001)
+	var direction := _electric_directions[index]
+	var side := direction.orthogonal()
+	var points := PackedVector2Array()
+	for segment_index in ELECTRIC_SEGMENTS + 1:
+		var progress := float(segment_index) / float(ELECTRIC_SEGMENTS)
+		var edge_fade := sin(PI * progress)
+		var phase := float(_electric_seeds[index] + segment_index * 19) + _electric_lifetimes[index] * 47.0
+		var jitter := sin(phase) * _tuning.electric_bolt_jitter * edge_fade
+		points.append(
+			_electric_origins[index]
+			+ direction * _tuning.electric_bolt_length * progress
+			+ side * jitter
+		)
+	draw_polyline(points, Color(0.0, 0.898, 0.816, life_ratio * 0.72), _tuning.electric_bolt_width * 2.0, true)
+	draw_polyline(points, Color(1.0, 1.0, 1.0, life_ratio), _tuning.electric_bolt_width, true)

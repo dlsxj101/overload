@@ -1,4 +1,4 @@
-[gd_scene load_steps=10 format=3]
+[gd_scene load_steps=11 format=3]
 
 [ext_resource type="Script" path="res://main.gd" id="1_main"]
 [ext_resource type="Script" path="res://systems/enemy_pool.gd" id="2_enemy"]
@@ -9,6 +9,7 @@
 [ext_resource type="Script" path="res://systems/audio_hit.gd" id="7_audio"]
 [ext_resource type="Script" path="res://debug/tuning_overlay.gd" id="8_overlay"]
 [ext_resource type="FontFile" path="res://fonts/BlackHanSans-Regular.ttf" id="9_font"]
+[ext_resource type="Script" path="res://systems/combo.gd" id="10_combo"]
 
 [node name="Main" type="Node2D"]
 script = ExtResource("1_main")
@@ -32,6 +33,9 @@ script = ExtResource("6_camera")
 [node name="AudioHit" type="Node" parent="."]
 process_mode = 3
 script = ExtResource("7_audio")
+
+[node name="Combo" type="Node" parent="."]
+script = ExtResource("10_combo")
 
 [node name="Instructions" type="Label" parent="."]
 offset_left = 257.0

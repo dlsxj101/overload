@@ -12,6 +12,7 @@ const TRAIL_COLOR := Color(0.0, 0.898, 0.816, 0.26)
 var _tuning: JuiceTuning
 var _combat: CombatSystem
 var _hitstop: Hitstop
+var _combo: ComboSystem
 var _arena_center := Vector2.ZERO
 var _arena_radius := 0.0
 var _aim_angle := 0.0
@@ -22,18 +23,23 @@ var _previous_swing_angle := 0.0
 var _attack_hit_registered := false
 var _attack_queued := false
 var _phase := AttackPhase.IDLE
+var _afterimage_angles: Array[float] = []
+var _afterimage_reaches: Array[float] = []
+var _afterimage_lifetimes: Array[float] = []
 
 
 func configure(
 	tuning_resource: JuiceTuning,
 	combat: CombatSystem,
 	hitstop: Hitstop,
+	combo: ComboSystem,
 	arena_center: Vector2,
 	arena_radius: float
 ) -> void:
 	_tuning = tuning_resource
 	_combat = combat
 	_hitstop = hitstop
+	_combo = combo
 	_arena_center = arena_center
 	_arena_radius = arena_radius
 	_hitstop.finished.connect(_on_hitstop_finished)
@@ -47,6 +53,7 @@ func _unhandled_input(event: InputEvent) -> void:
 
 
 func _process(delta: float) -> void:
+	_update_afterimages(delta)
 	_update_movement(delta)
 	_update_aim()
 	_cooldown_remaining = maxf(0.0, _cooldown_remaining - delta)
@@ -100,6 +107,9 @@ func _update_swing(delta: float) -> void:
 	var progress := _attack_elapsed / maxf(_tuning.swing_time, 0.001)
 	var half_arc := deg_to_rad(_tuning.sword_arc_degrees) * 0.5
 	var current_swing_angle := lerpf(-half_arc, half_arc, progress)
+	var effective_reach := get_effective_sword_reach()
+	if _combo.current_tier >= 2:
+		_record_afterimage(_attack_aim_angle + _previous_swing_angle, effective_reach)
 
 	if not _attack_hit_registered:
 		_attack_hit_registered = _combat.perform_sweep(
@@ -107,7 +117,7 @@ func _update_swing(delta: float) -> void:
 			_attack_aim_angle,
 			_previous_swing_angle,
 			current_swing_angle,
-			_tuning.sword_reach
+			effective_reach
 		)
 	_previous_swing_angle = current_swing_angle
 
@@ -117,6 +127,7 @@ func _update_swing(delta: float) -> void:
 
 
 func _draw() -> void:
+	_draw_afterimages()
 	var facing := Vector2.from_angle(_aim_angle)
 	var side := facing.orthogonal()
 	var body_points := PackedVector2Array([
@@ -129,16 +140,26 @@ func _draw() -> void:
 
 	if _phase == AttackPhase.IDLE:
 		return
+	var sword_scale := _combo.get_sword_scale()
+	var effective_reach := get_effective_sword_reach()
 	var sword_angle := _current_sword_angle()
 	if _phase == AttackPhase.SWING:
 		var half_arc := deg_to_rad(_tuning.sword_arc_degrees) * 0.5
-		draw_arc(Vector2.ZERO, _tuning.sword_reach * 0.88, _attack_aim_angle - half_arc, sword_angle, 28, TRAIL_COLOR, 10.0, true)
+		draw_arc(Vector2.ZERO, effective_reach * 0.88, _attack_aim_angle - half_arc, sword_angle, 28, TRAIL_COLOR, 10.0 * sword_scale, true)
 	var sword_direction := Vector2.from_angle(sword_angle)
 	var blade_start := sword_direction * PLAYER_RADIUS * 0.62
-	var blade_end := sword_direction * _tuning.sword_reach
-	draw_line(blade_start, blade_end, Color("081015"), 10.0, true)
-	draw_line(blade_start, blade_end, Color.WHITE, 5.0, true)
-	draw_circle(blade_end, 3.2, Color("00e5d0"))
+	var blade_end := sword_direction * effective_reach
+	if _combo.current_tier >= 1:
+		draw_line(
+			blade_start,
+			blade_end,
+			Color(0.0, 0.898, 0.816, _tuning.blade_glow_opacity),
+			_tuning.blade_glow_width * sword_scale,
+			true
+		)
+	draw_line(blade_start, blade_end, Color("081015"), 10.0 * sword_scale, true)
+	draw_line(blade_start, blade_end, Color.WHITE, 5.0 * sword_scale, true)
+	draw_circle(blade_end, 3.2 * sword_scale, Color("00e5d0"))
 
 
 func _current_sword_angle() -> float:
@@ -148,6 +169,47 @@ func _current_sword_angle() -> float:
 		return _attack_aim_angle + lerpf(0.0, -half_arc, ease(progress, 2.0))
 	var swing_progress := clampf(_attack_elapsed / maxf(_tuning.swing_time, 0.001), 0.0, 1.0)
 	return _attack_aim_angle + lerpf(-half_arc, half_arc, swing_progress)
+
+
+func get_effective_sword_reach() -> float:
+	return _tuning.sword_reach * _combo.get_sword_scale()
+
+
+func _record_afterimage(angle: float, reach: float) -> void:
+	_afterimage_angles.append(angle)
+	_afterimage_reaches.append(reach)
+	_afterimage_lifetimes.append(_tuning.afterimage_lifetime)
+	while _afterimage_angles.size() > _tuning.afterimage_max_count:
+		_afterimage_angles.pop_front()
+		_afterimage_reaches.pop_front()
+		_afterimage_lifetimes.pop_front()
+
+
+func _update_afterimages(delta: float) -> void:
+	for index in range(_afterimage_angles.size() - 1, -1, -1):
+		_afterimage_lifetimes[index] -= delta
+		if _afterimage_lifetimes[index] <= 0.0:
+			_afterimage_angles.remove_at(index)
+			_afterimage_reaches.remove_at(index)
+			_afterimage_lifetimes.remove_at(index)
+	if not _afterimage_angles.is_empty():
+		queue_redraw()
+
+
+func _draw_afterimages() -> void:
+	for index in _afterimage_angles.size():
+		var life_ratio := _afterimage_lifetimes[index] / maxf(_tuning.afterimage_lifetime, 0.001)
+		var direction := Vector2.from_angle(_afterimage_angles[index])
+		var blade_start := direction * PLAYER_RADIUS * 0.62
+		var blade_end := direction * _afterimage_reaches[index]
+		var width_scale := sqrt(_afterimage_reaches[index] / maxf(_tuning.sword_reach, 0.001))
+		draw_line(
+			blade_start,
+			blade_end,
+			Color(0.0, 0.898, 0.816, life_ratio * _tuning.afterimage_opacity),
+			5.0 * width_scale,
+			true
+		)
 
 
 func _on_hitstop_finished(_measured_seconds: float, had_buffered_attack: bool) -> void:

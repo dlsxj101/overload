@@ -16,14 +16,17 @@ const JUICE: JuiceTuning = preload("res://tuning/juice.tres")
 @onready var hitstop: Hitstop = $Hitstop
 @onready var camera_shake: DirectionalCameraShake = $CameraShake
 @onready var audio_hit: LayeredHitAudio = $AudioHit
+@onready var combo: ComboSystem = $Combo
 @onready var tuning_overlay: TuningOverlay = $TuningOverlay
 
 
 func _ready() -> void:
 	player.position = PLAYER_START
 	enemy_pool.configure(JUICE, ENEMY_SPAWN)
-	combat.configure(JUICE, enemy_pool, hitstop, camera_shake, audio_hit)
-	player.configure(JUICE, combat, hitstop, ARENA_CENTER, ARENA_RADIUS)
+	combo.configure(JUICE)
+	audio_hit.configure(JUICE)
+	combat.configure(JUICE, enemy_pool, hitstop, camera_shake, audio_hit, combo)
+	player.configure(JUICE, combat, hitstop, combo, ARENA_CENTER, ARENA_RADIUS)
 	tuning_overlay.configure(JUICE, hitstop)
 	queue_redraw()
 

@@ -2,7 +2,7 @@ class_name TuningOverlay
 extends CanvasLayer
 
 const PRESET_DIRECTORY := "res://tuning/presets"
-const USER_PRESET_PATH := "user://m1_user_preset.tres"
+const USER_PRESET_PATH := "user://m2_user_preset.tres"
 const UI_FONT: Font = preload("res://fonts/BlackHanSans-Regular.ttf")
 const PANEL_WIDTH := 430.0
 const PANEL_HEIGHT := 508.0
@@ -89,7 +89,7 @@ func _build_interface() -> void:
 	margin.add_child(content)
 
 	var title := Label.new()
-	title.text = "M1 타격감 튜닝  ·  F1 닫기"
+	title.text = "M2 콤보·타격 튜닝  ·  F1 닫기"
 	title.add_theme_font_size_override("font_size", 20)
 	content.add_child(title)
 
