@@ -24,8 +24,18 @@ func _run() -> void:
 	var combat := main.get_node("Combat") as CombatSystem
 	var hitstop := main.get_node("Hitstop") as Hitstop
 	var audio_hit := main.get_node("AudioHit") as LayeredHitAudio
+	var tuning_overlay := main.get_node("TuningOverlay") as TuningOverlay
 
 	_check(combo.combo_count == 0 and combo.current_tier == 0, "콤보 0에서 티어 0 시작")
+	var tuning_panel := tuning_overlay.get("_panel") as PanelContainer
+	var stats_label := tuning_overlay.get("_stats_label") as Label
+	stats_label.text = "갱신 대기"
+	tuning_overlay._process(1.0)
+	_check(stats_label.text == "갱신 대기", "F1 패널이 닫혀 있으면 통계 갱신 중지")
+	tuning_panel.visible = true
+	tuning_overlay._process(0.25)
+	_check(stats_label.text.begins_with("FPS"), "F1 패널이 열리면 제한 주기로 통계 갱신")
+	tuning_panel.visible = false
 	_check(is_equal_approx(combo.get_sword_scale(), 1.0), "티어 0 칼 1.0배")
 	_check(is_equal_approx(combo.get_hitstop_duration(), 0.05), "티어 0 히트스톱 0.05초")
 	_check(is_equal_approx(combo.get_windup_time(), 0.15), "티어 0 준비동작 0.15초")
@@ -106,10 +116,15 @@ func _run() -> void:
 		"티어 4 body 피치 하향과 ±8% 무작위 유지"
 	)
 
-	combo._process(main.JUICE.combo_grace_time)
+	combo.set("_last_kill_usec", Time.get_ticks_usec() - int(main.JUICE.combo_grace_time * 1_000_000.0))
+	combo._process(0.0)
 	_check(combo.combo_count == 100, "마지막 처치 후 3초 동안 콤보 유지")
-	combo._process(1.0)
-	_check(combo.combo_count == 95, "3초 이후 초당 5씩 점진 감소")
+	combo.set(
+		"_last_kill_usec",
+		Time.get_ticks_usec() - int((main.JUICE.combo_grace_time + 1.0) * 1_000_000.0)
+	)
+	combo._process(0.0)
+	_check(combo.combo_count == 95, "비활성 시간을 포함해 3초 이후 초당 5씩 감소")
 	_check(combo.current_tier == 3, "콤보 감소 시 티어도 하향")
 	_check(not combo.is_hum_playing() and is_equal_approx(combo.get_saturation(), 1.0), "티어 4 이탈 시 지속 연출 해제")
 

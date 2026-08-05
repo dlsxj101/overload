@@ -6,6 +6,7 @@ const USER_PRESET_PATH := "user://m2_user_preset.tres"
 const UI_FONT: Font = preload("res://fonts/BlackHanSans-Regular.ttf")
 const PANEL_WIDTH := 430.0
 const PANEL_HEIGHT := 508.0
+const STATS_UPDATE_INTERVAL_SECONDS := 0.25
 const DNA_PRESETS := [
 	{"name": "light_fast", "label": "경량·속공"},
 	{"name": "heavy_slow", "label": "중량·강타"},
@@ -28,6 +29,7 @@ var _snapshot_a: JuiceTuning
 var _snapshot_b: JuiceTuning
 var _showing_a := true
 var _syncing_controls := false
+var _stats_update_elapsed := STATS_UPDATE_INTERVAL_SECONDS
 
 
 func _ready() -> void:
@@ -45,13 +47,19 @@ func configure(tuning_resource: JuiceTuning, hitstop: Hitstop) -> void:
 	_sync_controls()
 
 
-func _process(_delta: float) -> void:
-	if _stats_label == null:
+func _process(delta: float) -> void:
+	if _stats_label == null or _panel == null or not _panel.visible:
 		return
-	_stats_label.text = "FPS  %d    마지막 히트스톱  %.4f초" % [
+	_stats_update_elapsed += delta
+	if _stats_update_elapsed < STATS_UPDATE_INTERVAL_SECONDS:
+		return
+	_stats_update_elapsed = 0.0
+	var next_text := "FPS  %d    마지막 히트스톱  %.4f초" % [
 		Engine.get_frames_per_second(),
 		_hitstop.last_measured_duration,
 	]
+	if _stats_label.text != next_text:
+		_stats_label.text = next_text
 
 
 func _unhandled_key_input(event: InputEvent) -> void:
@@ -59,6 +67,8 @@ func _unhandled_key_input(event: InputEvent) -> void:
 		return
 	if event.keycode == KEY_F1:
 		_panel.visible = not _panel.visible
+		if _panel.visible:
+			_stats_update_elapsed = STATS_UPDATE_INTERVAL_SECONDS
 		get_viewport().set_input_as_handled()
 	elif event.keycode == KEY_F2:
 		_toggle_ab()

@@ -22,8 +22,8 @@ var combo_count := 0
 var current_tier := 0
 
 var _tuning: JuiceTuning
-var _time_since_last_kill := 0.0
-var _decay_accumulator := 0.0
+var _combo_at_last_kill := 0
+var _last_kill_usec := 0
 var _transition_active := false
 var _transition_elapsed := 0.0
 var _saturation_material: ShaderMaterial
@@ -50,24 +50,18 @@ func _process(delta: float) -> void:
 	if combo_count <= 0:
 		return
 
-	var previous_elapsed := _time_since_last_kill
-	_time_since_last_kill += delta
-	var grace := _tuning.combo_grace_time
-	var decay_delta := maxf(0.0, _time_since_last_kill - grace) - maxf(0.0, previous_elapsed - grace)
-	if decay_delta <= 0.0:
-		return
-	_decay_accumulator += decay_delta * _tuning.combo_decay_per_second
-	var decay_steps := floori(_decay_accumulator)
-	if decay_steps <= 0:
-		return
-	_decay_accumulator -= float(decay_steps)
-	_set_combo(maxi(0, combo_count - decay_steps), false)
+	var elapsed_seconds := float(Time.get_ticks_usec() - _last_kill_usec) / 1_000_000.0
+	var decay_seconds := maxf(0.0, elapsed_seconds - _tuning.combo_grace_time)
+	var decay_steps := floori(decay_seconds * _tuning.combo_decay_per_second)
+	var expected_combo := maxi(0, _combo_at_last_kill - decay_steps)
+	if expected_combo != combo_count:
+		_set_combo(expected_combo, false)
 
 
 func register_kill() -> int:
-	_time_since_last_kill = 0.0
-	_decay_accumulator = 0.0
 	_set_combo(combo_count + 1, true)
+	_combo_at_last_kill = combo_count
+	_last_kill_usec = Time.get_ticks_usec()
 	return current_tier
 
 
