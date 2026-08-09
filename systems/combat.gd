@@ -21,6 +21,7 @@ var _electric_origins: Array[Vector2] = []
 var _electric_directions: Array[Vector2] = []
 var _electric_lifetimes: Array[float] = []
 var _electric_seeds: Array[int] = []
+var _g0_effects_enabled := true
 
 
 func configure(
@@ -61,6 +62,8 @@ func _process(delta: float) -> void:
 
 
 func _draw() -> void:
+	if not _g0_effects_enabled:
+		return
 	for index in _spark_positions.size():
 		var life_ratio := _spark_lifetimes[index] / SPARK_LIFETIME
 		var velocity_direction := _spark_velocities[index].normalized()
@@ -88,9 +91,10 @@ func perform_sweep(
 
 	_enemy_pool.hit_enemy(enemy_index, hit_direction)
 	var tier := _combo.register_kill()
-	_spawn_sparks(impact_position, hit_direction)
-	if tier >= 3:
-		_spawn_electric_sparks(impact_position, hit_direction)
+	if _g0_effects_enabled:
+		_spawn_sparks(impact_position, hit_direction)
+		if tier >= 3:
+			_spawn_electric_sparks(impact_position, hit_direction)
 	_camera_shake.kick(hit_direction, _tuning.shake_distance, _tuning.shake_return_time)
 	_audio_hit.play_hit(tier)
 	_hitstop.begin(_combo.get_hitstop_duration())
@@ -137,3 +141,17 @@ func _draw_electric_bolt(index: int) -> void:
 		)
 	draw_polyline(points, Color(0.0, 0.898, 0.816, life_ratio * 0.72), _tuning.electric_bolt_width * 2.0, true)
 	draw_polyline(points, Color(1.0, 1.0, 1.0, life_ratio), _tuning.electric_bolt_width, true)
+
+
+func set_g0_effects_enabled(enabled: bool) -> void:
+	_g0_effects_enabled = enabled
+	if enabled:
+		return
+	_spark_positions.clear()
+	_spark_velocities.clear()
+	_spark_lifetimes.clear()
+	_electric_origins.clear()
+	_electric_directions.clear()
+	_electric_lifetimes.clear()
+	_electric_seeds.clear()
+	queue_redraw()

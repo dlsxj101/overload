@@ -26,12 +26,15 @@ var _combo_at_last_kill := 0
 var _last_kill_usec := 0
 var _transition_active := false
 var _transition_elapsed := 0.0
+var _saturation_layer: CanvasLayer
 var _saturation_material: ShaderMaterial
 var _saturation_rect: ColorRect
+var _combo_layer: CanvasLayer
 var _flash_rect: ColorRect
 var _combo_label: Label
 var _rise_player: AudioStreamPlayer
 var _hum_player: AudioStreamPlayer
+var _g0_forced_tier := -1
 
 
 func configure(tuning_resource: JuiceTuning) -> void:
@@ -47,6 +50,8 @@ func _process(delta: float) -> void:
 	if _tuning == null:
 		return
 	_update_transition(delta)
+	if _g0_forced_tier >= 0:
+		return
 	if combo_count <= 0:
 		return
 
@@ -152,12 +157,16 @@ func _tier_for_combo(value: int) -> int:
 
 
 func _build_visual_layers() -> void:
-	var viewport_size := get_viewport().get_visible_rect().size
+	_build_saturation_layer()
+	_build_combo_layer()
 
-	var saturation_layer := CanvasLayer.new()
-	saturation_layer.name = "SaturationLayer"
-	saturation_layer.layer = 10
-	add_child(saturation_layer)
+
+func _build_saturation_layer() -> void:
+	var viewport_size := get_viewport().get_visible_rect().size
+	_saturation_layer = CanvasLayer.new()
+	_saturation_layer.name = "SaturationLayer"
+	_saturation_layer.layer = 10
+	add_child(_saturation_layer)
 
 	_saturation_rect = ColorRect.new()
 	_saturation_rect.name = "Saturation"
@@ -170,12 +179,15 @@ func _build_visual_layers() -> void:
 	_saturation_material = ShaderMaterial.new()
 	_saturation_material.shader = saturation_shader
 	_saturation_rect.material = _saturation_material
-	saturation_layer.add_child(_saturation_rect)
+	_saturation_layer.add_child(_saturation_rect)
 
-	var combo_layer := CanvasLayer.new()
-	combo_layer.name = "ComboLayer"
-	combo_layer.layer = 20
-	add_child(combo_layer)
+
+func _build_combo_layer() -> void:
+	var viewport_size := get_viewport().get_visible_rect().size
+	_combo_layer = CanvasLayer.new()
+	_combo_layer.name = "ComboLayer"
+	_combo_layer.layer = 20
+	add_child(_combo_layer)
 
 	_flash_rect = ColorRect.new()
 	_flash_rect.name = "TierFlash"
@@ -183,7 +195,7 @@ func _build_visual_layers() -> void:
 	_flash_rect.size = viewport_size
 	_flash_rect.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	_flash_rect.color = Color(0.88, 1.0, 0.98, 0.0)
-	combo_layer.add_child(_flash_rect)
+	_combo_layer.add_child(_flash_rect)
 
 	_combo_label = Label.new()
 	_combo_label.name = "ComboNumber"
@@ -195,7 +207,7 @@ func _build_visual_layers() -> void:
 	_combo_label.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
 	_combo_label.add_theme_font_override("font", UI_FONT)
 	_combo_label.add_theme_font_size_override("font_size", _tuning.combo_font_size)
-	combo_layer.add_child(_combo_label)
+	_combo_layer.add_child(_combo_label)
 
 
 func _build_audio() -> void:
@@ -227,7 +239,7 @@ func _update_combo_label() -> void:
 
 
 func _apply_tier_state() -> void:
-	if _saturation_material != null:
+	if _saturation_material != null and _saturation_rect != null:
 		_saturation_material.set_shader_parameter(
 			"saturation",
 			_tuning.tier_4_saturation if current_tier == 4 else 1.0
@@ -316,3 +328,31 @@ func _on_tuning_changed() -> void:
 		tier_changed.emit(previous_tier, current_tier)
 	_update_combo_label()
 	_apply_tier_state()
+
+
+func set_g0_saturation_node_enabled(enabled: bool) -> void:
+	if enabled:
+		if not is_instance_valid(_saturation_layer):
+			_build_saturation_layer()
+			_apply_tier_state()
+		return
+	if not is_instance_valid(_saturation_layer):
+		return
+	var layer_to_free := _saturation_layer
+	_saturation_layer = null
+	_saturation_rect = null
+	_saturation_material = null
+	layer_to_free.free()
+
+
+func set_g0_combo_layer_enabled(enabled: bool) -> void:
+	if is_instance_valid(_combo_layer):
+		_combo_layer.visible = enabled
+
+
+func set_g0_forced_tier(tier: int) -> void:
+	_g0_forced_tier = 4 if tier == 4 else 0
+	var forced_combo := _tuning.tier_4_threshold if _g0_forced_tier == 4 else 0
+	_combo_at_last_kill = forced_combo
+	_last_kill_usec = Time.get_ticks_usec()
+	_set_combo(forced_combo, false)

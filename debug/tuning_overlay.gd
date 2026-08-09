@@ -8,11 +8,11 @@ const PANEL_WIDTH := 430.0
 const PANEL_HEIGHT := 508.0
 const STATS_UPDATE_INTERVAL_SECONDS := 0.25
 const DNA_PRESETS := [
-	{"name": "light_fast", "label": "경량·속공"},
-	{"name": "heavy_slow", "label": "중량·강타"},
-	{"name": "wide_cleave", "label": "광역·횡베기"},
-	{"name": "precision", "label": "정밀·결투"},
-	{"name": "elastic", "label": "탄성·밀어내기"},
+	{"name": "light_fast", "label": "경량/속공"},
+	{"name": "heavy_slow", "label": "중량/강타"},
+	{"name": "wide_cleave", "label": "광역/횡베기"},
+	{"name": "precision", "label": "정밀/결투"},
+	{"name": "elastic", "label": "탄성/밀어내기"},
 ]
 
 var _tuning: JuiceTuning
@@ -70,7 +70,7 @@ func _unhandled_key_input(event: InputEvent) -> void:
 		if _panel.visible:
 			_stats_update_elapsed = STATS_UPDATE_INTERVAL_SECONDS
 		get_viewport().set_input_as_handled()
-	elif event.keycode == KEY_F2:
+	elif event.keycode == KEY_F3:
 		_toggle_ab()
 		get_viewport().set_input_as_handled()
 
@@ -99,7 +99,7 @@ func _build_interface() -> void:
 	margin.add_child(content)
 
 	var title := Label.new()
-	title.text = "M2 콤보·타격 튜닝  ·  F1 닫기"
+	title.text = "M2 콤보/타격 튜닝  |  F1 닫기"
 	title.add_theme_font_size_override("font_size", 20)
 	content.add_child(title)
 
@@ -139,11 +139,11 @@ func _build_interface() -> void:
 	var ab_row := HBoxContainer.new()
 	ab_row.add_child(_make_button("A 캡처", _capture_a))
 	ab_row.add_child(_make_button("B 캡처", _capture_b))
-	ab_row.add_child(_make_button("A/B 전환  F2", _toggle_ab))
+	ab_row.add_child(_make_button("A/B 전환  F3", _toggle_ab))
 	content.add_child(ab_row)
 
 	_status_label = Label.new()
-	_status_label.text = "A 사용 중 · F2로 즉시 비교"
+	_status_label.text = "A 사용 중 | F3로 즉시 비교"
 	_status_label.add_theme_color_override("font_color", Color("00e5d0"))
 	content.add_child(_status_label)
 
@@ -212,7 +212,7 @@ func _load_preset_list() -> void:
 		var preset_name: String = preset_spec["name"]
 		_preset_paths.append("%s/%s.tres" % [PRESET_DIRECTORY, preset_name])
 		_preset_names.append(preset_name)
-		_preset_picker.add_item("DNA · %s" % preset_spec["label"])
+		_preset_picker.add_item("DNA | %s" % preset_spec["label"])
 
 
 func _apply_selected_preset() -> void:
@@ -277,7 +277,7 @@ func _toggle_ab() -> void:
 	_showing_a = not _showing_a
 	_tuning.copy_from(_snapshot_a if _showing_a else _snapshot_b)
 	_sync_controls()
-	_set_status("%s 사용 중 · F2로 즉시 비교" % ("A" if _showing_a else "B"))
+	_set_status("%s 사용 중 | F3로 즉시 비교" % ("A" if _showing_a else "B"))
 
 
 func _load_snapshot_or_default(path: String) -> JuiceTuning:

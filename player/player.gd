@@ -27,6 +27,8 @@ var _phase := AttackPhase.IDLE
 var _afterimage_angles: Array[float] = []
 var _afterimage_reaches: Array[float] = []
 var _afterimage_lifetimes: Array[float] = []
+var _g0_continuous_redraw_enabled := true
+var _g0_effects_enabled := true
 
 
 func configure(
@@ -54,9 +56,10 @@ func _unhandled_input(event: InputEvent) -> void:
 
 
 func _process(delta: float) -> void:
+	var was_attack_active := _phase != AttackPhase.IDLE
 	_update_afterimages(delta)
 	_update_movement(delta)
-	_update_aim()
+	var aim_changed := _update_aim()
 	_cooldown_remaining = maxf(0.0, _cooldown_remaining - delta)
 
 	match _phase:
@@ -67,7 +70,14 @@ func _process(delta: float) -> void:
 			_update_windup(delta)
 		AttackPhase.SWING:
 			_update_swing(delta)
-	queue_redraw()
+	if (
+		_g0_continuous_redraw_enabled
+		or aim_changed
+		or was_attack_active
+		or _phase != AttackPhase.IDLE
+		or not _afterimage_angles.is_empty()
+	):
+		queue_redraw()
 
 
 func _update_movement(delta: float) -> void:
@@ -79,10 +89,14 @@ func _update_movement(delta: float) -> void:
 		position = _arena_center + center_offset.normalized() * maximum_distance
 
 
-func _update_aim() -> void:
+func _update_aim() -> bool:
 	var mouse_offset := get_global_mouse_position() - global_position
-	if not mouse_offset.is_zero_approx():
-		_aim_angle = mouse_offset.angle()
+	if mouse_offset.is_zero_approx():
+		return false
+	var next_aim_angle := mouse_offset.angle()
+	var changed := not is_equal_approx(next_aim_angle, _aim_angle)
+	_aim_angle = next_aim_angle
+	return changed
 
 
 func _begin_attack() -> void:
@@ -178,6 +192,8 @@ func get_effective_sword_reach() -> float:
 
 
 func _record_afterimage(angle: float, reach: float) -> void:
+	if not _g0_effects_enabled:
+		return
 	_afterimage_angles.append(angle)
 	_afterimage_reaches.append(reach)
 	_afterimage_lifetimes.append(_tuning.afterimage_lifetime)
@@ -217,3 +233,18 @@ func _draw_afterimages() -> void:
 func _on_hitstop_finished(_measured_seconds: float, had_buffered_attack: bool) -> void:
 	if had_buffered_attack:
 		_attack_queued = true
+
+
+func set_g0_continuous_redraw_enabled(enabled: bool) -> void:
+	_g0_continuous_redraw_enabled = enabled
+	queue_redraw()
+
+
+func set_g0_effects_enabled(enabled: bool) -> void:
+	_g0_effects_enabled = enabled
+	if enabled:
+		return
+	_afterimage_angles.clear()
+	_afterimage_reaches.clear()
+	_afterimage_lifetimes.clear()
+	queue_redraw()

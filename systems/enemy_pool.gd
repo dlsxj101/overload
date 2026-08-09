@@ -17,19 +17,27 @@ var knockback_durations: Array[float] = []
 var knockback_distances: Array[float] = []
 var flash_frames_remaining: Array[int] = []
 var _tuning: JuiceTuning
+var _g0_render_enabled := true
 
 
-func configure(tuning_resource: JuiceTuning, spawn_position: Vector2) -> void:
+func configure(tuning_resource: JuiceTuning, spawn_points: Array[Vector2]) -> void:
 	_tuning = tuning_resource
-	positions = [spawn_position]
-	spawn_positions = [spawn_position]
-	knockback_echo_positions = [spawn_position]
-	knockback_echo_active = [false]
-	knockback_directions = [Vector2.ZERO]
-	knockback_elapsed = [0.0]
-	knockback_durations = [0.0]
-	knockback_distances = [0.0]
-	flash_frames_remaining = [0]
+	positions = spawn_points.duplicate()
+	spawn_positions = spawn_points.duplicate()
+	knockback_echo_positions = spawn_points.duplicate()
+	knockback_echo_active.clear()
+	knockback_directions.clear()
+	knockback_elapsed.clear()
+	knockback_durations.clear()
+	knockback_distances.clear()
+	flash_frames_remaining.clear()
+	for _spawn_point in spawn_points:
+		knockback_echo_active.append(false)
+		knockback_directions.append(Vector2.ZERO)
+		knockback_elapsed.append(0.0)
+		knockback_durations.append(0.0)
+		knockback_distances.append(0.0)
+		flash_frames_remaining.append(0)
 	queue_redraw()
 
 
@@ -52,6 +60,8 @@ func _process(delta: float) -> void:
 
 
 func _draw() -> void:
+	if not _g0_render_enabled:
+		return
 	for index in positions.size():
 		_draw_active_enemy(positions[index])
 		if knockback_echo_active[index]:
@@ -85,6 +95,11 @@ func hit_enemy(index: int, direction: Vector2) -> void:
 
 func get_enemy_position(index: int) -> Vector2:
 	return positions[index]
+
+
+func set_g0_render_enabled(enabled: bool) -> void:
+	_g0_render_enabled = enabled
+	queue_redraw()
 
 
 func _draw_active_enemy(center: Vector2) -> void:

@@ -146,3 +146,15 @@
 - **시도했다가 버린 접근**: 최신 웹 FPS·1% low·무캐시 첫 입력 시점, 실제 GPU 드로우콜, 히트스톱 100회 프레임 오차, 직전 10회 피치값은 현재 계측 로그가 없고 이번 요청이 코드·파일 변경을 금지하므로 임시 계측 코드를 추가하지 않았다. 기존 사용자 측정과 코드상 이론값은 실측값과 구분했다.
 - **남은 이슈**: M2 사람 통과 판정, 최신 수정 빌드의 티어 0·4 FPS 재측정, 1% low·로딩·첫 입력 계측, 적 50/100마리 GPU 프로파일, 히트스톱 중 각 Godot 타이머 유형의 프로젝트 통합 실험이 남아 있다. 공개 빌드 원시 용량은 40.420MB로 보고 기준 8MB를 초과한다.
 - **변경 파일**: DEVLOG.md
+
+---
+
+## [2026-08-09 13:34] G0 성능 응급 측정 및 전송량 확보
+- **마일스톤**: G0
+- **요청받은 것**: 적 1마리 웹 프레임타임 22~28ms의 원인을 기능별 토글과 30초 프레임 히스토그램으로 분리하고, 적 1/10/50/100/150마리의 증분 비용, 티어 0/4, Chrome/Firefox를 Web release에서 측정할 것. 폰트를 실사용 글자로 서브셋하고 공개 전송량을 실측할 것. 사용자의 후속 지시에 따라 Cloudflare Pages는 사용하지 않고 GPT Sites로 공개할 것. 원인 판정 전 최적화·M2 소급 수정·M2.5는 시작하지 않을 것.
+- **Codex가 구현한 것**: F1과 완전히 분리된 F2 G0 프로파일러, 1초 평균·최대·1% low·히스토그램, Godot Performance 모니터, 기능 1~7/0 토글, 적 수 N/M 프리셋, 티어 0/4 강제 전환과 30초 결과 출력을 추가했다. Chrome과 Firefox에서 원인 분리·적 수·티어 매트릭스를 모두 측정했다. GPT Sites에 로그인 없이 실행되는 Web release를 배포하고 총 전송량 7,378,293B, 첫 입력 8.161초를 실측했다. Black Han Sans를 998,424B에서 69,004B로 서브셋하고 재생성 절차·OFL 고지를 남겼다. 계측 외 런타임 기본 동작과 렌더 아키텍처는 변경하지 않았다.
+- **사람이 직접 한 것**: G0 이전 공개 빌드에서 Chrome 또는 Edge의 F1 표시로 티어 0 약 45 FPS, 티어 4 약 36 FPS를 확인했고, 창 비포커스 중 콤보 감소가 멈추는 현상을 발견했다. G0 최우선 측정 착수를 지시하고 Cloudflare 대신 GPT Sites 사용을 명시적으로 승인했다. 최신 G0 매트릭스는 Codex가 같은 물리 PC의 실제 브라우저를 자동 계측했으며, 사람이 내릴 최종 원인 판정은 아직 남아 있다.
+- **해결한 문제**: `적 1마리에서 웹 22~28ms` → 최신 F1 닫힘 release에서는 A와 H 모두 5.56ms로 과거 수치가 재현되지 않았고, 게임 기능 전체의 차이는 프레임타임 0ms·TIME_PROCESS 약 0.625ms뿐임을 특정했다. 현재 적 렌더가 22ms의 범인이 아니라는 것과, 과거 수치는 당시 빌드·F1 표시·브라우저 포커스를 같은 조건으로 재현해야만 더 분해할 수 있음을 확인했다. 적 비용은 1→150 회귀 기준 0.0347ms/마리이고 100마리 process 실측은 5.075ms였다. 티어 4 채도는 10마리에서 약 1.583ms를 더했다. 원시 WASM의 호스팅 제한은 q11 Brotli를 정확한 `br` 응답으로 제공해 해결했고, 총 전송량을 8MB 아래로 확보했다.
+- **시도했다가 버린 접근**: Player redraw는 프레임 변화 없이 process 약 0.259ms, 적 1마리 렌더는 6 draw call·474 primitives 감소에도 프레임 변화 없음, F1 트리 제거는 292노드·약 0.071ms, 티어 0 채도 노드 제거는 약 0.035ms, 셰이크와 콤보 레이어는 측정 잡음 범위여서 어느 것도 22ms의 범인이 아니었다. 전부 끈 H도 A와 같은 5.56ms였다. 이전 커밋 `561d520`의 F1 닫힘 빌드도 평균 5.554ms라 과거 수치를 재현하지 못했다. OS 전경이 아닌 Chrome 자동 측정 두 건은 rAF가 멈춰 폐기했다. GPT Sites에 39,513,091B 원시 WASM을 직접 올리는 접근은 25MiB 제한으로 실패했고, 첫 Brotli route는 플랫폼의 중복 압축으로 무효 WASM이 되어 폐기한 뒤 manual encoded response로 교체했다.
+- **남은 이슈**: 당시와 동일한 F1 표시·빌드·포커스 조건의 로그가 없어 과거 22~28ms의 단일 원인은 확정하지 못했다. 두 번째 물리 기기가 없어 Chrome/Firefox는 한 PC에서만 측정했다. 사람이 `현재 코드에는 22ms 병목이 없고 과거 계측 조건 재현이 필요하다`는 판정을 승인할 때까지 M2 소급 수정과 M2.5-A 구현을 시작하지 않는다.
+- **변경 파일**: debug/g0_profiler.gd, debug/tuning_overlay.gd, main.gd, main.tscn, player/player.gd, systems/camera_shake.gd, systems/combat.gd, systems/combo.gd, systems/enemy_pool.gd, tests/g0_smoke_test.gd, tests/m1_smoke_test.gd, tools/g0_measure.mjs, tools/g0_measure_firefox.py, tools/subset_font.py, fonts/BlackHanSans-Regular.ttf, fonts/source/BlackHanSans-Regular.full.ttf, fonts/SUBSET.md, export_presets.cfg, CREDITS.md, hosting/gpt-sites/.openai/hosting.json, hosting/gpt-sites/README.md, G0_REPORT.md, DEVLOG.md

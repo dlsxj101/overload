@@ -1,4 +1,4 @@
-[gd_scene load_steps=11 format=3]
+[gd_scene load_steps=12 format=3]
 
 [ext_resource type="Script" path="res://main.gd" id="1_main"]
 [ext_resource type="Script" path="res://systems/enemy_pool.gd" id="2_enemy"]
@@ -10,6 +10,7 @@
 [ext_resource type="Script" path="res://debug/tuning_overlay.gd" id="8_overlay"]
 [ext_resource type="FontFile" path="res://fonts/BlackHanSans-Regular.ttf" id="9_font"]
 [ext_resource type="Script" path="res://systems/combo.gd" id="10_combo"]
+[ext_resource type="Script" path="res://debug/g0_profiler.gd" id="11_g0"]
 
 [node name="Main" type="Node2D"]
 script = ExtResource("1_main")
@@ -46,9 +47,13 @@ mouse_filter = 2
 theme_override_colors/font_color = Color(0.72, 0.78, 0.81, 0.82)
 theme_override_fonts/font = ExtResource("9_font")
 theme_override_font_sizes/font_size = 17
-text = "WASD 이동  ·  마우스 조준  ·  좌클릭 베기  ·  F1 튜닝"
+text = "WASD 이동  |  마우스 조준  |  좌클릭 베기  |  F1 튜닝"
 horizontal_alignment = 1
 
 [node name="TuningOverlay" type="CanvasLayer" parent="."]
 process_mode = 3
 script = ExtResource("8_overlay")
+
+[node name="G0Profiler" type="CanvasLayer" parent="."]
+process_mode = 3
+script = ExtResource("11_g0")

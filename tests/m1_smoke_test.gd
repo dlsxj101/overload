@@ -32,15 +32,15 @@ func _run() -> void:
 	_check((overlay.get("_sliders") as Dictionary).size() == JuiceTuning.PARAMETER_SPECS.size(), "모든 튜닝 파라미터 슬라이더")
 	_check((overlay.get("_preset_paths") as Array).size() == 5, "웹에서도 고정 로드되는 DNA 목록 5개")
 	var preset_picker := overlay.get("_preset_picker") as OptionButton
-	_check(preset_picker.get_item_text(0).begins_with("DNA · "), "선별 DNA의 한국어 특성 표시")
+	_check(preset_picker.get_item_text(0).begins_with("DNA | "), "선별 DNA의 한국어 특성 표시")
 	_check(is_equal_approx(main.JUICE.hitstop_duration, 0.05), "기본 히트스톱 0.05초")
 	_check(is_equal_approx(main.JUICE.sword_reach, 44.0), "기본 사거리 플레이어 반경 2.2배")
 	for preset_path in overlay.get("_preset_paths") as Array:
 		_check(ResourceLoader.load(preset_path) is JuiceTuning, "프리셋 로드: %s" % preset_path.get_file())
 	overlay._toggle_ab()
-	_check(is_equal_approx(main.JUICE.hitstop_duration, 0.08), "F2로 B 프리셋 즉시 전환")
+	_check(is_equal_approx(main.JUICE.hitstop_duration, 0.08), "F3로 B 프리셋 즉시 전환")
 	overlay._toggle_ab()
-	_check(is_equal_approx(main.JUICE.hitstop_duration, 0.05), "F2로 A 프리셋 즉시 복귀")
+	_check(is_equal_approx(main.JUICE.hitstop_duration, 0.05), "F3로 A 프리셋 즉시 복귀")
 	overlay._save_user_preset()
 	main.JUICE.hitstop_duration = 0.01
 	overlay._load_user_preset()
